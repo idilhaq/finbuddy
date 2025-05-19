@@ -1,0 +1,22 @@
+# Go
+bin/
+*.exe
+*.test
+*.out
+
+# Env files
+.env
+
+# Logs
+*.log
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+
+# Dependency directories (if you use vendoring)
+vendor/
+
+# Docker
+*.pid
