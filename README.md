@@ -33,7 +33,7 @@ cd finbuddy
 Create a `.env` file:
 ```
 DB_HOST=localhost
-DB_PORT=5433
+DB_PORT=5432
 DB_USER=finbuddy_user
 DB_PASSWORD=finbuddy_pass
 DB_NAME=finbuddy_db
@@ -45,7 +45,7 @@ docker run --name finbuddy-db \
   -e POSTGRES_USER=finbuddy_user \
   -e POSTGRES_PASSWORD=finbuddy_pass \
   -e POSTGRES_DB=finbuddy_db \
-  -p 5433:5432 \
+  -p 5432:5432 \
   -d postgres
 ```
 
@@ -81,7 +81,7 @@ See [`docs/schedule.md`](docs/schedule.md) _(coming soon)_ for daily breakdowns 
 
 ## 🧑‍💻 Author
 
-Built by [@yourusername](https://github.com/yourusername) to improve Go backend and product development skills.
+Built by [@idilhaq](https://github.com/idilhaq) to improve Go backend and product development skills.
 
 ---
 
