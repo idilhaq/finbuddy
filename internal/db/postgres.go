@@ -12,10 +12,18 @@ import (
 
 var DB *gorm.DB
 
-func Init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("❌ Error loading .env file")
+func Init() error {
+	// Only load .env if not running inside Docker
+	// (you can also check for a special env var in docker-compose)
+	if _, inDocker := os.LookupEnv("DOCKER_ENV"); !inDocker {
+		err := godotenv.Load()
+		if err != nil {
+			log.Println("⚠️  No .env file found, continuing without it")
+		} else {
+			log.Println("✅ Loaded .env file")
+		}
+	} else {
+		log.Println("✅ Running inside Docker, skip loading .env")
 	}
 
 	dsn := fmt.Sprintf(
@@ -26,11 +34,11 @@ func Init() {
 		os.Getenv("DB_NAME"),
 		os.Getenv("DB_PORT"),
 	)
-
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatalf("❌ Failed to connect to DB: %v", err)
+		return fmt.Errorf("failed to connect to DB: %w", err)
 	}
 
 	DB = db
+	return nil
 }

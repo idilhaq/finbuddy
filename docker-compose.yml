@@ -1,0 +1,36 @@
+services:
+  api:
+    build: .
+    container_name: finbuddy-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: finbuddy_user
+      DB_PASSWORD: finbuddy_pass
+      DB_NAME: finbuddy_db
+    depends_on:
+      - db
+    networks:
+      - finbuddy-net
+
+  db:
+    image: postgres:latest
+    container_name: finbuddy-db
+    environment:
+      POSTGRES_USER: finbuddy_user
+      POSTGRES_PASSWORD: finbuddy_pass
+      POSTGRES_DB: finbuddy_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - finbuddy-data:/var/lib/postgresql/data
+    networks:
+      - finbuddy-net
+
+networks:
+  finbuddy-net:
+
+volumes:
+  finbuddy-data:
