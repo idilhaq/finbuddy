@@ -1,0 +1,17 @@
+info:
+  contact: {}
+paths:
+  /healthz:
+    get:
+      description: Returns OK
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health Check
+      tags:
+      - Health
+swagger: "2.0"

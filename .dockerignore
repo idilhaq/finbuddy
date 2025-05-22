@@ -1,0 +1,29 @@
+# Binaries
+finbuddy-api
+
+# Dependency directories
+vendor/
+
+# VCS
+.git
+.gitignore
+
+# IDE/editor files
+*.swp
+*.swo
+*.idea/
+.vscode/
+*.log
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Test coverage & build cache
+coverage.out
+*.test
+*.exe
+*.out
+
+# Go build cache
+/pkg/

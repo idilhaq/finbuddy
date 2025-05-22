@@ -1,0 +1,12 @@
+services:
+  api:
+    build:
+      context: .
+      target: dev         # use dev stage in Dockerfile
+    volumes:
+      - ./:/app           # mount your source code
+      - air-cache:/app/tmp
+    command: air          # override entrypoint to use air
+
+volumes:
+  air-cache:

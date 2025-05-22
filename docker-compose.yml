@@ -14,9 +14,10 @@ services:
       - db
     networks:
       - finbuddy-net
+    restart: unless-stopped
 
   db:
-    image: postgres:latest
+    image: postgres:17
     container_name: finbuddy-db
     environment:
       POSTGRES_USER: finbuddy_user
@@ -28,6 +29,12 @@ services:
       - finbuddy-data:/var/lib/postgresql/data
     networks:
       - finbuddy-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finbuddy_user -d finbuddy_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 networks:
   finbuddy-net:
