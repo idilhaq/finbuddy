@@ -5,6 +5,8 @@ import (
 
 	"github.com/idilhaq/finbuddy/internal/db"
 	"github.com/idilhaq/finbuddy/internal/router"
+
+	_ "github.com/idilhaq/finbuddy/docs"
 )
 
 func main() {

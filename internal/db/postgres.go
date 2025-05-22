@@ -38,6 +38,7 @@ func Init() error {
 	if err != nil {
 		return fmt.Errorf("failed to connect to DB: %w", err)
 	}
+	db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
 
 	DB = db
 	return nil
