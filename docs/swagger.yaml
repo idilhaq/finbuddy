@@ -16,6 +16,50 @@ definitions:
       updated_at:
         type: string
       user_id:
+        type: string
+    type: object
+  db.MonthlyPlan:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      month:
+        description: e.g. "2025-05"
+        type: string
+      needs:
+        type: integer
+      savings:
+        type: integer
+      updatedAt:
+        type: string
+      userID:
+        type: string
+      wants:
+        type: integer
+    type: object
+  handler.BudgetSummary:
+    properties:
+      needs:
+        type: integer
+      savings:
+        type: integer
+      wants:
+        type: integer
+    type: object
+  handler.DashboardResponse:
+    properties:
+      budget_plan:
+        $ref: '#/definitions/handler.BudgetSummary'
+      needs:
+        type: integer
+      savings:
+        type: integer
+      total_expenses:
+        type: integer
+      total_savings:
+        type: integer
+      wants:
         type: integer
     type: object
   handler.ErrorResponse:
@@ -23,9 +67,52 @@ definitions:
       error:
         type: string
     type: object
+  handler.MonthlyPlanRequest:
+    properties:
+      month:
+        description: e.g. "2025-05"
+        type: string
+      needs:
+        type: integer
+      savings:
+        type: integer
+      user_id:
+        type: string
+      wants:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
+  /dashboard:
+    get:
+      description: Return top-level insights for the user’s current month including
+        expenses, breakdowns, and savings
+      parameters:
+      - description: User UUID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: Month in format YYYY-MM
+        in: query
+        name: month
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.DashboardResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get dashboard summary
+      tags:
+      - dashboard
   /expenses:
     get:
       description: Returns a list of all expenses
@@ -166,4 +253,67 @@ paths:
       summary: Health Check
       tags:
       - Health
+  /plans:
+    post:
+      consumes:
+      - application/json
+      description: Create or update a monthly budget plan split by needs, wants, and
+        savings
+      parameters:
+      - description: Monthly plan input
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.MonthlyPlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.MonthlyPlan'
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/db.MonthlyPlan'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create or update a monthly plan
+      tags:
+      - plans
+  /plans/{month}:
+    get:
+      description: Retrieve a user's monthly budget plan by YYYY-MM
+      parameters:
+      - description: Month in format YYYY-MM
+        in: path
+        name: month
+        required: true
+        type: string
+      - description: User UUID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/db.MonthlyPlan'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get a monthly plan by month
+      tags:
+      - plans
 swagger: "2.0"

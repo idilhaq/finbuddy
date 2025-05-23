@@ -15,6 +15,48 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/dashboard": {
+            "get": {
+                "description": "Return top-level insights for the user’s current month including expenses, breakdowns, and savings",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "dashboard"
+                ],
+                "summary": "Get dashboard summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Month in format YYYY-MM",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.DashboardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/expenses": {
             "get": {
                 "description": "Returns a list of all expenses",
@@ -226,6 +268,100 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/plans": {
+            "post": {
+                "description": "Create or update a monthly budget plan split by needs, wants, and savings",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Create or update a monthly plan",
+                "parameters": [
+                    {
+                        "description": "Monthly plan input",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.MonthlyPlanRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.MonthlyPlan"
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/db.MonthlyPlan"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/plans/{month}": {
+            "get": {
+                "description": "Retrieve a user's monthly budget plan by YYYY-MM",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "plans"
+                ],
+                "summary": "Get a monthly plan by month",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Month in format YYYY-MM",
+                        "name": "month",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User UUID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/db.MonthlyPlan"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -254,6 +390,73 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "db.MonthlyPlan": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "month": {
+                    "description": "e.g. \"2025-05\"",
+                    "type": "string"
+                },
+                "needs": {
+                    "type": "integer"
+                },
+                "savings": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                },
+                "wants": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.BudgetSummary": {
+            "type": "object",
+            "properties": {
+                "needs": {
+                    "type": "integer"
+                },
+                "savings": {
+                    "type": "integer"
+                },
+                "wants": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.DashboardResponse": {
+            "type": "object",
+            "properties": {
+                "budget_plan": {
+                    "$ref": "#/definitions/handler.BudgetSummary"
+                },
+                "needs": {
+                    "type": "integer"
+                },
+                "savings": {
+                    "type": "integer"
+                },
+                "total_expenses": {
+                    "type": "integer"
+                },
+                "total_savings": {
+                    "type": "integer"
+                },
+                "wants": {
                     "type": "integer"
                 }
             }
@@ -263,6 +466,27 @@ const docTemplate = `{
             "properties": {
                 "error": {
                     "type": "string"
+                }
+            }
+        },
+        "handler.MonthlyPlanRequest": {
+            "type": "object",
+            "properties": {
+                "month": {
+                    "description": "e.g. \"2025-05\"",
+                    "type": "string"
+                },
+                "needs": {
+                    "type": "integer"
+                },
+                "savings": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "wants": {
+                    "type": "integer"
                 }
             }
         }

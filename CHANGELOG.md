@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [23-05-2025]
+### Added
+- Implemented filter and grouping support on `/expenses` (`?date`, `?month`, `?category`, `group_by=date`)
+- Added `/plans` endpoints:
+  - `POST /plans` to create or update monthly budget
+  - `GET /plans/:month` to retrieve a specific plan
+- Introduced `/dashboard` endpoint with summarized financial data
+- Defined `Saving` model with UUID primary key
+- Created Swagger annotations for `/plans` and `/dashboard`
+- Defined `ErrorResponse` struct for consistent API error docs
+
+### Changed
+- Migrated all `user_id` fields from `int` to `uuid.UUID`
+- Updated dashboard aggregation queries to use `COALESCE(SUM(...), 0)`
+- Switched `swag init` to target `cmd/api/main.go` for correct doc generation
+
+### Fixed
+- Resolved Swagger error caused by `gin.H` in `@Failure` annotations
+- Fixed SQL scan error on null SUM results in dashboard using `COALESCE` fallback
+
 ## [22-05-2025]
 ### Added
 - Integrated `air` hot-reload for development
