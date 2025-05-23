@@ -22,8 +22,10 @@ func SetupRouter() *gin.Engine {
 		c.JSON(200, gin.H{"message": "Hello FinBuddy!"})
 	})
 
+	// Dashboard route
+	r.GET("/dashboard", handler.GetDashboardSummary)
+
 	// Group expense routes
-	r.GET("/api/dashboard", handler.DashboardHandler)
 	expenseGroup := r.Group("/expenses")
 	{
 		expenseGroup.GET("", handler.GetAllExpenses)
@@ -31,6 +33,13 @@ func SetupRouter() *gin.Engine {
 		expenseGroup.GET("/:id", handler.GetExpenseByID)
 		expenseGroup.PUT("/:id", handler.UpdateExpense)
 		expenseGroup.DELETE("/:id", handler.DeleteExpense)
+	}
+
+	// Group monthly plan routes
+	planGroup := r.Group("/plans")
+	{
+		planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
+		planGroup.GET("/:month", handler.GetMonthlyPlan)
 	}
 
 	return r
