@@ -24,8 +24,8 @@ func main() {
 	// Set up router from the internal/router package
 	r := router.SetupRouter()
 
-	log.Println("🚀 Starting API on :8080")
-	if err := r.Run(":8080"); err != nil {
+	log.Println("🚀 Starting API on :3000")
+	if err := r.Run(":3000"); err != nil {
 		log.Fatalf("❌ Failed to start server: %v", err)
 	}
 }

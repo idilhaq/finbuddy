@@ -20,7 +20,7 @@ WORKDIR /app
 
 COPY --from=builder /app/finbuddy-api .
 
-EXPOSE 8080
+EXPOSE 3000
 
 ENTRYPOINT ["./finbuddy-api"]
 

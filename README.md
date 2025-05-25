@@ -58,7 +58,7 @@ make dev-up
 
 > This uses `docker-compose.override.yml` and mounts your source code with `air` for hot reload.
 
-Then open: [http://localhost:8080/healthz](http://localhost:8080/healthz)
+Then open: [http://localhost:3000/healthz](http://localhost:3000/healthz)
 
 ---
 

@@ -1,15 +1,36 @@
 package router
 
 import (
-	"github.com/idilhaq/finbuddy/internal/handler"
+	"os"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/gin-gonic/gin"
+	"github.com/idilhaq/finbuddy/internal/handler"
 )
 
 func SetupRouter() *gin.Engine {
 	r := gin.Default()
+
+	env := os.Getenv("APP_ENV") // e.g., "development" or "production"
+
+	if env == "development" {
+		// 🚀 Development → Allow all origins (unsafe, but fast for local dev)
+		r.Use(cors.Default())
+	} else {
+		// 🔒 Production → Strict, only allow the real frontend
+		r.Use(cors.New(cors.Config{
+			AllowOrigins:     []string{"https://your-production-frontend.com"},
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+			MaxAge:           12 * time.Hour,
+		}))
+	}
 
 	// Health check route
 	r.GET("/healthz", handler.HealthzHandler)
@@ -23,10 +44,10 @@ func SetupRouter() *gin.Engine {
 	})
 
 	// Dashboard route
-	r.GET("/dashboard", handler.GetDashboardSummary)
+	r.GET("/api/dashboard", handler.GetDashboardSummary)
 
 	// Group expense routes
-	expenseGroup := r.Group("/expenses")
+	expenseGroup := r.Group("/api/expenses")
 	{
 		expenseGroup.GET("", handler.GetAllExpenses)
 		expenseGroup.POST("", handler.CreateExpense)
@@ -36,7 +57,7 @@ func SetupRouter() *gin.Engine {
 	}
 
 	// Group monthly plan routes
-	planGroup := r.Group("/plans")
+	planGroup := r.Group("/api/plans")
 	{
 		planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
 		planGroup.GET("/:month", handler.GetMonthlyPlan)

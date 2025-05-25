@@ -36,7 +36,7 @@
 ### Fixed
 - Disabled Go VCS stamping via `-buildvcs=false` to fix exit status 128
 - Fixed missing binary error (`tmp/main: not found`) during `air` run
-- Confirmed hot reload works and API accessible at `localhost:8080`
+- Confirmed hot reload works and API accessible at `localhost:3000`
 
 ---
 
