@@ -23,7 +23,7 @@ func SetupRouter() *gin.Engine {
 	} else {
 		// 🔒 Production → Strict, only allow the real frontend
 		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"https://your-production-frontend.com"},
+			AllowOrigins:     []string{"http://127.0.0.1:8080"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
