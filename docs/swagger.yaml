@@ -38,6 +38,13 @@ definitions:
       wants:
         type: integer
     type: object
+  handler.AuthRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   handler.BudgetSummary:
     properties:
       needs:
@@ -84,7 +91,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /dashboard:
+  /api/dashboard:
     get:
       description: Return top-level insights for the user’s current month including
         expenses, breakdowns, and savings
@@ -112,8 +119,8 @@ paths:
             $ref: '#/definitions/handler.ErrorResponse'
       summary: Get dashboard summary
       tags:
-      - dashboard
-  /expenses:
+      - Dashboard
+  /api/expenses:
     get:
       description: Returns a list of all expenses
       produces:
@@ -161,7 +168,7 @@ paths:
       summary: Create a new expense
       tags:
       - Expenses
-  /expenses/{id}:
+  /api/expenses/{id}:
     delete:
       description: Remove an expense by ID
       parameters:
@@ -240,7 +247,7 @@ paths:
       summary: Update an expense
       tags:
       - Expenses
-  /healthz:
+  /api/healthz:
     get:
       description: Returns OK
       responses:
@@ -253,7 +260,43 @@ paths:
       summary: Health Check
       tags:
       - Health
-  /plans:
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: User credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login a user
+      tags:
+      - auth
+  /api/plans:
     post:
       consumes:
       - application/json
@@ -287,8 +330,8 @@ paths:
             $ref: '#/definitions/handler.ErrorResponse'
       summary: Create or update a monthly plan
       tags:
-      - plans
-  /plans/{month}:
+      - Plans
+  /api/plans/{month}:
     get:
       description: Retrieve a user's monthly budget plan by YYYY-MM
       parameters:
@@ -316,4 +359,40 @@ paths:
       summary: Get a monthly plan by month
       tags:
       - plans
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with email and password
+      parameters:
+      - description: User credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AuthRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
 swagger: "2.0"

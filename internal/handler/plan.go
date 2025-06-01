@@ -26,7 +26,7 @@ type MonthlyPlanRequest struct {
 // @Success      200 {object} db.MonthlyPlan
 // @Failure      400 {object} handler.ErrorResponse
 // @Failure      500 {object} handler.ErrorResponse
-// @Router       /plans [post]
+// @Router       /api/plans [post]
 func CreateOrUpdateMonthlyPlan(c *gin.Context) {
 	var req MonthlyPlanRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,7 +72,7 @@ func CreateOrUpdateMonthlyPlan(c *gin.Context) {
 // @Param        user_id query string true "User UUID"
 // @Success      200 {object} db.MonthlyPlan
 // @Failure      404 {object} handler.ErrorResponse
-// @Router       /plans/{month} [get]
+// @Router       /api/plans/{month} [get]
 func GetMonthlyPlan(c *gin.Context) {
 	month := c.Param("month")
 	userID := c.Query("user_id") // for now, use query param

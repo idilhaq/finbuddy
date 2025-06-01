@@ -17,7 +17,7 @@ type ErrorResponse struct {
 // @Description  Returns OK
 // @Tags         Health
 // @Success      200  {object}  map[string]string
-// @Router       /healthz [get]
+// @Router       /api/healthz [get]
 func HealthzHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
@@ -29,7 +29,7 @@ func HealthzHandler(c *gin.Context) {
 // @Produce      json
 // @Success      200  {array}  db.Expense
 // @Failure      500  {object}  ErrorResponse
-// @Router       /expenses [get]
+// @Router       /api/expenses [get]
 func GetAllExpenses(c *gin.Context) {
 	var expenses []db.Expense
 	query := db.DB
@@ -130,7 +130,7 @@ func GetAllExpenses(c *gin.Context) {
 // @Success      201      {object}  db.Expense
 // @Failure      400      {object}  ErrorResponse
 // @Failure 	 500      {object}  ErrorResponse
-// @Router       /expenses [post]
+// @Router       /api/expenses [post]
 func CreateExpense(c *gin.Context) {
 	var expense db.Expense
 	if err := c.ShouldBindJSON(&expense); err != nil {
@@ -152,7 +152,7 @@ func CreateExpense(c *gin.Context) {
 // @Param        id   path      string  true  "Expense ID"
 // @Success      200  {object}  db.Expense
 // @Failure      404  {object}  ErrorResponse
-// @Router       /expenses/{id} [get]
+// @Router       /api/expenses/{id} [get]
 func GetExpenseByID(c *gin.Context) {
 	id := c.Param("id")
 	var expense db.Expense
@@ -174,7 +174,7 @@ func GetExpenseByID(c *gin.Context) {
 // @Success      200      {object}  db.Expense
 // @Failure      400      {object}  ErrorResponse
 // @Failure      404      {object}  ErrorResponse
-// @Router       /expenses/{id} [put]
+// @Router       /api/expenses/{id} [put]
 func UpdateExpense(c *gin.Context) {
 	id := c.Param("id")
 	var expense db.Expense
@@ -201,7 +201,7 @@ func UpdateExpense(c *gin.Context) {
 // @Param        id   path      string  true  "Expense ID"
 // @Success      204  {string}  string  "No Content"
 // @Failure      500  {object}  ErrorResponse
-// @Router       /expenses/{id} [delete]
+// @Router       /api/expenses/{id} [delete]
 func DeleteExpense(c *gin.Context) {
 	id := c.Param("id")
 	if err := db.DB.Delete(&db.Expense{}, "id = ?", id).Error; err != nil {

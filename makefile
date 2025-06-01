@@ -66,3 +66,6 @@ dev-down:
 
 dev-shell:
 	$(DOCKER_COMPOSE) exec api sh
+
+update-swagger:
+	swag init -g cmd/api/main.go --output docs

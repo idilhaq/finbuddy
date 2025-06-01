@@ -10,6 +10,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/idilhaq/finbuddy/internal/handler"
+	"github.com/idilhaq/finbuddy/internal/middleware"
 )
 
 func SetupRouter() *gin.Engine {
@@ -43,24 +44,38 @@ func SetupRouter() *gin.Engine {
 		c.JSON(200, gin.H{"message": "Hello FinBuddy!"})
 	})
 
-	// Dashboard route
-	r.GET("/api/dashboard", handler.GetDashboardSummary)
-
-	// Group expense routes
-	expenseGroup := r.Group("/api/expenses")
+	api := r.Group("/api")
 	{
-		expenseGroup.GET("", handler.GetAllExpenses)
-		expenseGroup.POST("", handler.CreateExpense)
-		expenseGroup.GET("/:id", handler.GetExpenseByID)
-		expenseGroup.PUT("/:id", handler.UpdateExpense)
-		expenseGroup.DELETE("/:id", handler.DeleteExpense)
-	}
+		// Auth routes (fix: attach under /api)
+		authGroup := api.Group("/auth")
+		{
+			authGroup.POST("/register", handler.Register)
+			authGroup.POST("/login", handler.Login)
+		}
 
-	// Group monthly plan routes
-	planGroup := r.Group("/api/plans")
-	{
-		planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
-		planGroup.GET("/:month", handler.GetMonthlyPlan)
+		// Expense routes
+		expenseGroup := api.Group("/expenses")
+		{
+			expenseGroup.GET("", handler.GetAllExpenses)
+			expenseGroup.POST("", handler.CreateExpense)
+			expenseGroup.GET("/:id", handler.GetExpenseByID)
+			expenseGroup.PUT("/:id", handler.UpdateExpense)
+			expenseGroup.DELETE("/:id", handler.DeleteExpense)
+		}
+
+		// Monthly plan routes
+		planGroup := api.Group("/plans")
+		{
+			planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
+			planGroup.GET("/:month", handler.GetMonthlyPlan)
+		}
+
+		// Protected routes
+		protected := api.Group("/")
+		protected.Use(middleware.JWTAuthMiddleware())
+		{
+			protected.GET("/dashboard", handler.GetDashboardSummary)
+		}
 	}
 
 	return r

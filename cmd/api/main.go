@@ -17,7 +17,7 @@ func main() {
 	log.Println("✅ Connected to PostgreSQL successfully.")
 
 	// Auto-migrate your models
-	if err := db.DB.AutoMigrate(&db.Expense{}, &db.MonthlyPlan{}, &db.Saving{}); err != nil {
+	if err := db.DB.AutoMigrate(&db.Expense{}, &db.MonthlyPlan{}, &db.Saving{}, &db.User{}); err != nil {
 		log.Fatalf("❌ AutoMigrate failed: %v", err)
 	}
 
