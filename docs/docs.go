@@ -15,14 +15,14 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/dashboard": {
+        "/api/dashboard": {
             "get": {
                 "description": "Return top-level insights for the user’s current month including expenses, breakdowns, and savings",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "dashboard"
+                    "Dashboard"
                 ],
                 "summary": "Get dashboard summary",
                 "parameters": [
@@ -57,7 +57,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/expenses": {
+        "/api/expenses": {
             "get": {
                 "description": "Returns a list of all expenses",
                 "produces": [
@@ -130,7 +130,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/expenses/{id}": {
+        "/api/expenses/{id}": {
             "get": {
                 "description": "Retrieve expense by ID",
                 "produces": [
@@ -249,7 +249,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/healthz": {
+        "/api/healthz": {
             "get": {
                 "description": "Returns OK",
                 "tags": [
@@ -269,7 +269,62 @@ const docTemplate = `{
                 }
             }
         },
-        "/plans": {
+        "/api/login": {
+            "post": {
+                "description": "Authenticate user and return JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Login a user",
+                "parameters": [
+                    {
+                        "description": "User credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.AuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plans": {
             "post": {
                 "description": "Create or update a monthly budget plan split by needs, wants, and savings",
                 "consumes": [
@@ -279,7 +334,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "plans"
+                    "Plans"
                 ],
                 "summary": "Create or update a monthly plan",
                 "parameters": [
@@ -321,7 +376,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/plans/{month}": {
+        "/api/plans/{month}": {
             "get": {
                 "description": "Retrieve a user's monthly budget plan by YYYY-MM",
                 "produces": [
@@ -358,6 +413,61 @@ const docTemplate = `{
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/handler.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "description": "Register a new user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Register a new user",
+                "parameters": [
+                    {
+                        "description": "User credentials",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.AuthRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -421,6 +531,17 @@ const docTemplate = `{
                 },
                 "wants": {
                     "type": "integer"
+                }
+            }
+        },
+        "handler.AuthRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },

@@ -32,7 +32,7 @@ type BudgetSummary struct {
 // @Param        month query string true "Month in format YYYY-MM"
 // @Success      200 {object} handler.DashboardResponse
 // @Failure      400 {object} handler.ErrorResponse
-// @Router       /dashboard [get]
+// @Router       /api/dashboard [get]
 func GetDashboardSummary(c *gin.Context) {
 	userIDStr := c.Query("user_id")
 	month := c.Query("month")

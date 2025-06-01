@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [01-06-2025]
+
+### Added
+- JWT auth: `/api/auth/register`, `/api/auth/login`
+- User model with UUID + bcrypt
+- JWT middleware for protected routes
+
+### Changed
+- Nested all routes under `/api` (including `/api/auth/*`)
+
+### Fixed
+- 404 issue on `/api/auth/*` by correcting router group attachment
+
+
 ## [23-05-2025]
 ### Added
 - Implemented filter and grouping support on `/expenses` (`?date`, `?month`, `?category`, `group_by=date`)
