@@ -289,7 +289,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthRequest"
+                            "$ref": "#/definitions/handler.LoginRequest"
                         }
                     }
                 ],
@@ -298,9 +298,7 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "additionalProperties": true
                         }
                     },
                     "400": {
@@ -420,7 +418,7 @@ const docTemplate = `{
         },
         "/api/register": {
             "post": {
-                "description": "Register a new user with email and password",
+                "description": "Register a new user with name, email, password, and optional role",
                 "consumes": [
                     "application/json"
                 ],
@@ -433,12 +431,12 @@ const docTemplate = `{
                 "summary": "Register a new user",
                 "parameters": [
                     {
-                        "description": "User credentials",
+                        "description": "User registration data",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.AuthRequest"
+                            "$ref": "#/definitions/handler.RegisterRequest"
                         }
                     }
                 ],
@@ -534,17 +532,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.AuthRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "handler.BudgetSummary": {
             "type": "object",
             "properties": {
@@ -590,6 +577,17 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.MonthlyPlanRequest": {
             "type": "object",
             "properties": {
@@ -608,6 +606,24 @@ const docTemplate = `{
                 },
                 "wants": {
                     "type": "integer"
+                }
+            }
+        },
+        "handler.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "description": "optional, default to 'user'",
+                    "type": "string"
                 }
             }
         }
