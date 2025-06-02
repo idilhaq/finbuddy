@@ -41,7 +41,9 @@ type Saving struct {
 type User struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Email     string    `gorm:"uniqueIndex"`
-	Password  string    // hashed password
+	Password  string
+	Name      string
+	Role      string `gorm:"default:user"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

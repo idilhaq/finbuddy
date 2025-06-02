@@ -38,13 +38,6 @@ definitions:
       wants:
         type: integer
     type: object
-  handler.AuthRequest:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    type: object
   handler.BudgetSummary:
     properties:
       needs:
@@ -74,6 +67,13 @@ definitions:
       error:
         type: string
     type: object
+  handler.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   handler.MonthlyPlanRequest:
     properties:
       month:
@@ -87,6 +87,18 @@ definitions:
         type: string
       wants:
         type: integer
+    type: object
+  handler.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        description: optional, default to 'user'
+        type: string
     type: object
 info:
   contact: {}
@@ -271,15 +283,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.AuthRequest'
+          $ref: '#/definitions/handler.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
+            additionalProperties: true
             type: object
         "400":
           description: Bad Request
@@ -363,14 +374,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a new user with email and password
+      description: Register a new user with name, email, password, and optional role
       parameters:
-      - description: User credentials
+      - description: User registration data
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handler.AuthRequest'
+          $ref: '#/definitions/handler.RegisterRequest'
       produces:
       - application/json
       responses:
