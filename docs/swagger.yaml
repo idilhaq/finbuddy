@@ -306,7 +306,7 @@ paths:
             type: object
       summary: Login a user
       tags:
-      - auth
+      - Auth
   /api/plans:
     post:
       consumes:
@@ -369,7 +369,7 @@ paths:
             $ref: '#/definitions/handler.ErrorResponse'
       summary: Get a monthly plan by month
       tags:
-      - plans
+      - Plans
   /api/register:
     post:
       consumes:
@@ -405,5 +405,51 @@ paths:
             type: object
       summary: Register a new user
       tags:
-      - auth
+      - Auth
+  /user/info:
+    get:
+      description: Retrieves the authenticated user's information based on the user_id
+        stored in the context.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User information
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user information
+      tags:
+      - Users
+  /user/me:
+    get:
+      description: Retrieves the current authenticated user's information from the
+        context.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get current user
+      tags:
+      - Users
 swagger: "2.0"

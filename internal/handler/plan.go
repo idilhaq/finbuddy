@@ -66,7 +66,7 @@ func CreateOrUpdateMonthlyPlan(c *gin.Context) {
 
 // @Summary      Get a monthly plan by month
 // @Description  Retrieve a user's monthly budget plan by YYYY-MM
-// @Tags         plans
+// @Tags         Plans
 // @Produce      json
 // @Param        month path string true "Month in format YYYY-MM"
 // @Param        user_id query string true "User UUID"

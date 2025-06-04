@@ -10,6 +10,7 @@ services:
       DB_USER: finbuddy_user
       DB_PASSWORD: finbuddy_pass
       DB_NAME: finbuddy_db
+      APP_ENV: development
     depends_on:
       - db
     networks:
