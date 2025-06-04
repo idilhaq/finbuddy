@@ -21,7 +21,7 @@ func SetupRouter() *gin.Engine {
 	if env == "development" {
 		// 🚀 Development → Allow all origins (unsafe, but fast for local dev)
 		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"https://finbuddy-ui.onrender.com"},
+			AllowOrigins:     []string{"*"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
@@ -31,7 +31,7 @@ func SetupRouter() *gin.Engine {
 	} else {
 		// 🔒 Production → Strict, only allow the real frontend
 		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"http://127.0.0.1:8080", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"},
+			AllowOrigins:     []string{"https://finbuddy-ui.onrender.com", "http://127.0.0.1:8080", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
