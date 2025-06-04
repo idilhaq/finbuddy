@@ -21,7 +21,7 @@ func SetupRouter() *gin.Engine {
 	if env == "development" {
 		// 🚀 Development → Allow all origins (unsafe, but fast for local dev)
 		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"*"},
+			AllowOrigins:     []string{"https://finbuddy-ui.onrender.com"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
