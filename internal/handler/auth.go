@@ -28,7 +28,7 @@ type RegisterRequest struct {
 // Register godoc
 // @Summary      Register a new user
 // @Description  Register a new user with name, email, password, and optional role
-// @Tags         auth
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        request body RegisterRequest true "User registration data"
@@ -68,7 +68,7 @@ func Register(c *gin.Context) {
 // Login godoc
 // @Summary      Login a user
 // @Description  Authenticate user and return JWT token
-// @Tags         auth
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        request body LoginRequest true "User credentials"

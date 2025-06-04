@@ -20,7 +20,14 @@ func SetupRouter() *gin.Engine {
 
 	if env == "development" {
 		// 🚀 Development → Allow all origins (unsafe, but fast for local dev)
-		r.Use(cors.Default())
+		r.Use(cors.New(cors.Config{
+			AllowOrigins:     []string{"*"},
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+			ExposeHeaders:    []string{"Content-Length"},
+			AllowCredentials: true,
+			MaxAge:           12 * time.Hour,
+		}))
 	} else {
 		// 🔒 Production → Strict, only allow the real frontend
 		r.Use(cors.New(cors.Config{
@@ -46,7 +53,7 @@ func SetupRouter() *gin.Engine {
 
 	api := r.Group("/api")
 	{
-		// Auth routes (fix: attach under /api)
+		// Auth routes
 		authGroup := api.Group("/auth")
 		{
 			authGroup.POST("/register", handler.Register)
@@ -75,6 +82,13 @@ func SetupRouter() *gin.Engine {
 		protected.Use(middleware.JWTAuthMiddleware())
 		{
 			protected.GET("/dashboard", handler.GetDashboardSummary)
+
+			// User routes
+			userGroup := protected.Group("/users")
+			{
+				userGroup.GET("/:id", handler.GetUserInfo)
+				userGroup.GET("/me", handler.GetCurrentUser)
+			}
 		}
 	}
 
