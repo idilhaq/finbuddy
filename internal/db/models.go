@@ -12,7 +12,7 @@ type Expense struct {
 	Category  string    `json:"category"`
 	Amount    int       `json:"amount"`
 	Note      string    `json:"note"`
-	Date      time.Time `json:"date"`
+	Date      string    `json:"date"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -33,7 +33,7 @@ type Saving struct {
 	UserID    uuid.UUID
 	Amount    int
 	Note      string
-	Date      time.Time
+	Date      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

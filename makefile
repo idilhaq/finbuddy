@@ -69,3 +69,6 @@ dev-shell:
 
 update-swagger:
 	swag init -g cmd/api/main.go --output docs
+
+reset-db:
+	docker exec -i finbuddy-db psql -U finbuddy_user -d finbuddy_db -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"

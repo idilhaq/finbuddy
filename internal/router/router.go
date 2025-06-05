@@ -21,7 +21,7 @@ func SetupRouter() *gin.Engine {
 	if env == "development" {
 		// 🚀 Development → Allow all origins (unsafe, but fast for local dev)
 		r.Use(cors.New(cors.Config{
-			AllowOrigins:     []string{"*"},
+			AllowOrigins:     []string{"http://127.0.0.1:5173"},
 			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 			ExposeHeaders:    []string{"Content-Length"},
@@ -60,16 +60,6 @@ func SetupRouter() *gin.Engine {
 			authGroup.POST("/login", handler.Login)
 		}
 
-		// Expense routes
-		expenseGroup := api.Group("/expenses")
-		{
-			expenseGroup.GET("", handler.GetAllExpenses)
-			expenseGroup.POST("", handler.CreateExpense)
-			expenseGroup.GET("/:id", handler.GetExpenseByID)
-			expenseGroup.PUT("/:id", handler.UpdateExpense)
-			expenseGroup.DELETE("/:id", handler.DeleteExpense)
-		}
-
 		// Monthly plan routes
 		planGroup := api.Group("/plans")
 		{
@@ -81,13 +71,24 @@ func SetupRouter() *gin.Engine {
 		protected := api.Group("/")
 		protected.Use(middleware.JWTAuthMiddleware())
 		{
+			// Expense routes
+			expenseGroup := protected.Group("/expenses")
+			{
+				expenseGroup.GET("", handler.GetAllExpenses)
+				expenseGroup.POST("", handler.CreateExpense)
+				expenseGroup.GET("/:id", handler.GetExpenseByID)
+				expenseGroup.PUT("/:id", handler.UpdateExpense)
+				expenseGroup.DELETE("/:id", handler.DeleteExpense)
+				expenseGroup.GET("/me", handler.GetAllExpensesByUserID)
+			}
+
+			// Dashboard route
 			protected.GET("/dashboard", handler.GetDashboardSummary)
 
 			// User routes
 			userGroup := protected.Group("/users")
 			{
-				userGroup.GET("/:id", handler.GetUserInfo)
-				userGroup.GET("/me", handler.GetCurrentUser)
+				userGroup.GET("/me", handler.GetUserInfo)
 			}
 		}
 	}
