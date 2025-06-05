@@ -54,24 +54,24 @@ func GetDashboardSummary(c *gin.Context) {
 	var total, needs, wants, savings, totalSavings int
 
 	db.DB.Model(&db.Expense{}).
-		Where("user_id = ? AND date >= ? AND date < ?", userID, start, end).
+		Where("user_id = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, start, end).
 		Select("COALESCE(SUM(amount), 0)").
 		Scan(&total)
 
 	db.DB.Model(&db.Expense{}).
-		Where("user_id = ? AND category = ? AND date >= ? AND date < ?", userID, "Needs", start, end).
+		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "Needs", start, end).
 		Select("COALESCE(SUM(amount), 0)").Scan(&needs)
 
 	db.DB.Model(&db.Expense{}).
-		Where("user_id = ? AND category = ? AND date >= ? AND date < ?", userID, "Wants", start, end).
+		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "Wants", start, end).
 		Select("COALESCE(SUM(amount), 0)").Scan(&wants)
 
 	db.DB.Model(&db.Expense{}).
-		Where("user_id = ? AND category = ? AND date >= ? AND date < ?", userID, "Savings", start, end).
+		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "Savings", start, end).
 		Select("COALESCE(SUM(amount), 0)").Scan(&savings)
 
 	db.DB.Model(&db.Saving{}).
-		Where("user_id = ? AND date >= ? AND date < ? AND amount IS NOT NULL", userID, start, end).
+		Where("user_id = ? AND DATE(date) >= ? AND DATE(date) < ? AND amount IS NOT NULL", userID, start, end).
 		Select("COALESCE(SUM(amount), 0)").Scan(&totalSavings)
 
 	var plan db.MonthlyPlan

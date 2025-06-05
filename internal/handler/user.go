@@ -39,21 +39,3 @@ func GetUserInfo(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, userInfo)
 }
-
-// GetCurrentUser handles the HTTP request to retrieve the current authenticated user's information.
-// @Summary      Get current user
-// @Description  Retrieves the current authenticated user's information from the context.
-// @Tags         Users
-// @Produce      json
-// @Success      200  {object}  interface{}
-// @Failure      401  {object}  map[string]string       "Unauthorized"
-// @Router       /user/me [get]
-func GetCurrentUser(c *gin.Context) {
-	user, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found in context"})
-		return
-	}
-
-	c.JSON(http.StatusOK, user)
-}
