@@ -2,85 +2,91 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/idilhaq/finbuddy/internal/db"
 )
 
-type MonthlyPlanRequest struct {
-	UserID  uuid.UUID `json:"user_id"`
-	Month   string    `json:"month"` // e.g. "2025-05"
-	Needs   int       `json:"needs"`
-	Wants   int       `json:"wants"`
-	Savings int       `json:"savings"`
-}
-
-// @Summary      Create or update a monthly plan
-// @Description  Create or update a monthly budget plan split by needs, wants, and savings
-// @Tags         Plans
-// @Accept       json
-// @Produce      json
-// @Param        request body MonthlyPlanRequest true "Monthly plan input"
-// @Success      201 {object} db.MonthlyPlan
-// @Success      200 {object} db.MonthlyPlan
-// @Failure      400 {object} handler.ErrorResponse
-// @Failure      500 {object} handler.ErrorResponse
-// @Router       /api/plans [post]
+// POST /api/plans
 func CreateOrUpdateMonthlyPlan(c *gin.Context) {
-	var req MonthlyPlanRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var input db.MonthlyPlan
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var plan db.MonthlyPlan
-	result := db.DB.Where("month = ? AND user_id = ?", req.Month, req.UserID).First(&plan)
-
-	if result.RowsAffected > 0 {
-		// Update existing
-		plan.Needs = req.Needs
-		plan.Wants = req.Wants
-		plan.Savings = req.Savings
-		db.DB.Save(&plan)
-		c.JSON(http.StatusOK, plan)
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
 	}
+	userID, _ := uuid.Parse(userIDVal.(string))
+	input.UserID = userID
 
-	// Create new
-	newPlan := db.MonthlyPlan{
-		ID:      uuid.New(),
-		UserID:  req.UserID,
-		Month:   req.Month,
-		Needs:   req.Needs,
-		Wants:   req.Wants,
-		Savings: req.Savings,
+	// Upsert MonthlyPlan
+	var existing db.MonthlyPlan
+	if err := db.DB.Where("user_id = ? AND month = ?", input.UserID, input.Month).First(&existing).Error; err == nil {
+		input.ID = existing.ID
+		db.DB.Model(&existing).Association("Items").Clear()
 	}
-	if err := db.DB.Create(&newPlan).Error; err != nil {
+
+	if err := db.DB.Save(&input).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, newPlan)
+	c.JSON(http.StatusOK, input)
 }
 
-// @Summary      Get a monthly plan by month
-// @Description  Retrieve a user's monthly budget plan by YYYY-MM
-// @Tags         Plans
-// @Produce      json
-// @Param        month path string true "Month in format YYYY-MM"
-// @Param        user_id query string true "User UUID"
-// @Success      200 {object} db.MonthlyPlan
-// @Failure      404 {object} handler.ErrorResponse
-// @Router       /api/plans/{month} [get]
+// GET /api/plans/:month
 func GetMonthlyPlan(c *gin.Context) {
 	month := c.Param("month")
-	userID := c.Query("user_id") // for now, use query param
+	parsedMonth, err := time.Parse("2006-01", month)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid month format. Use YYYY-MM"})
+		return
+	}
+
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, _ := uuid.Parse(userIDVal.(string))
 
 	var plan db.MonthlyPlan
-	if err := db.DB.Where("month = ? AND user_id = ?", month, userID).First(&plan).Error; err != nil {
+	if err := db.DB.Preload("Items.Pocket").Preload("Items.InvestmentGoal").
+		Where("user_id = ? AND month = ?", userID, parsedMonth).
+		First(&plan).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
 	}
+
 	c.JSON(http.StatusOK, plan)
+}
+
+// DELETE /api/plans/:month
+func DeleteMonthlyPlan(c *gin.Context) {
+	month := c.Param("month")
+	parsedMonth, err := time.Parse("2006-01", month)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid month format. Use YYYY-MM"})
+		return
+	}
+
+	userIDVal, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	userID, _ := uuid.Parse(userIDVal.(string))
+
+	if err := db.DB.Where("user_id = ? AND month = ?", userID, parsedMonth).Delete(&db.MonthlyPlan{}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Plan deleted"})
 }
