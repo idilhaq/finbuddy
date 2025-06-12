@@ -60,13 +60,6 @@ func SetupRouter() *gin.Engine {
 			authGroup.POST("/login", handler.Login)
 		}
 
-		// Monthly plan routes
-		planGroup := api.Group("/plans")
-		{
-			planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
-			planGroup.GET("/:month", handler.GetMonthlyPlan)
-		}
-
 		// Protected routes
 		protected := api.Group("/")
 		protected.Use(middleware.JWTAuthMiddleware())
@@ -80,6 +73,13 @@ func SetupRouter() *gin.Engine {
 				expenseGroup.PUT("/:id", handler.UpdateExpense)
 				expenseGroup.DELETE("/:id", handler.DeleteExpense)
 				expenseGroup.GET("/me", handler.GetAllExpensesByUserID)
+			}
+
+			planGroup := protected.Group("/plans")
+			{
+				planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
+				planGroup.GET("/:month", handler.GetMonthlyPlan)
+				planGroup.DELETE("/:month", handler.DeleteMonthlyPlan)
 			}
 
 			// Dashboard route
