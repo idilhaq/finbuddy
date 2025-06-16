@@ -51,7 +51,7 @@ func GetDashboardSummary(c *gin.Context) {
 	start := parsedMonth
 	end := start.AddDate(0, 1, 0)
 
-	var total, needs, wants, savings, totalSavings int
+	var total, needs, wants, savings int
 
 	db.DB.Model(&db.Expense{}).
 		Where("user_id = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, start, end).
@@ -59,40 +59,22 @@ func GetDashboardSummary(c *gin.Context) {
 		Scan(&total)
 
 	db.DB.Model(&db.Expense{}).
-		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "Needs", start, end).
+		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "needs", start, end).
 		Select("COALESCE(SUM(amount), 0)").Scan(&needs)
 
 	db.DB.Model(&db.Expense{}).
-		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "Wants", start, end).
+		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "wants", start, end).
 		Select("COALESCE(SUM(amount), 0)").Scan(&wants)
 
 	db.DB.Model(&db.Expense{}).
-		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "Savings", start, end).
+		Where("user_id = ? AND category = ? AND DATE(date) >= ? AND DATE(date) < ?", userID, "savings", start, end).
 		Select("COALESCE(SUM(amount), 0)").Scan(&savings)
-
-	db.DB.Model(&db.Saving{}).
-		Where("user_id = ? AND DATE(date) >= ? AND DATE(date) < ? AND amount IS NOT NULL", userID, start, end).
-		Select("COALESCE(SUM(amount), 0)").Scan(&totalSavings)
-
-	var plan db.MonthlyPlan
-	err = db.DB.Where("user_id = ? AND month = ?", userID, month).First(&plan).Error
-
-	var planSummary *BudgetSummary
-	if err == nil {
-		planSummary = &BudgetSummary{
-			Needs:   plan.Needs,
-			Wants:   plan.Wants,
-			Savings: plan.Savings,
-		}
-	}
 
 	resp := DashboardResponse{
 		TotalExpenses: total,
 		Needs:         needs,
 		Wants:         wants,
 		Savings:       savings,
-		TotalSavings:  totalSavings,
-		BudgetPlan:    planSummary,
 	}
 
 	c.JSON(http.StatusOK, resp)
