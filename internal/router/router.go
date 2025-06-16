@@ -75,13 +75,6 @@ func SetupRouter() *gin.Engine {
 				expenseGroup.GET("/me", handler.GetAllExpensesByUserID)
 			}
 
-			planGroup := protected.Group("/plans")
-			{
-				planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
-				planGroup.GET("/:month", handler.GetMonthlyPlan)
-				planGroup.DELETE("/:month", handler.DeleteMonthlyPlan)
-			}
-
 			// Dashboard route
 			protected.GET("/dashboard", handler.GetDashboardSummary)
 
@@ -89,6 +82,34 @@ func SetupRouter() *gin.Engine {
 			userGroup := protected.Group("/users")
 			{
 				userGroup.GET("/me", handler.GetUserInfo)
+			}
+
+			// Monthly plan routes
+			planGroup := protected.Group("/plans")
+			{
+				planGroup.POST("", handler.CreateOrUpdateMonthlyPlan)
+				planGroup.GET("/:month", handler.GetMonthlyPlan)
+				planGroup.DELETE("/:month", handler.DeleteMonthlyPlan)
+			}
+
+			// Pocket routes
+			pocketGroup := protected.Group("/pockets")
+			{
+				pocketGroup.GET("", handler.GetAllPockets)
+				pocketGroup.POST("", handler.CreatePocket)
+				pocketGroup.GET("/:id", handler.GetPocketByID)
+				pocketGroup.PUT("/:id", handler.UpdatePocket)
+				pocketGroup.DELETE("/:id", handler.DeletePocket)
+			}
+
+			// Investment goal routes
+			goalGroup := protected.Group("/goals")
+			{
+				goalGroup.GET("", handler.GetAllInvestmentGoals)
+				goalGroup.POST("", handler.CreateInvestmentGoal)
+				goalGroup.GET("/:id", handler.GetInvestmentGoalByID)
+				goalGroup.PUT("/:id", handler.UpdateInvestmentGoal)
+				goalGroup.DELETE("/:id", handler.DeleteInvestmentGoal)
 			}
 		}
 	}
