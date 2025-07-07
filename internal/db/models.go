@@ -47,9 +47,9 @@ type PlanItem struct {
 	Category       string    `gorm:"not null"`
 	Amount         int       `gorm:"not null"`
 	Note           string
-	FrequencyValue int       // e.g. 5
-	FrequencyUnit  string    // e.g. times, days
-	FrequencyRate  int       // e.g. 40000 (amount per unit)
+	FrequencyValue int    // e.g. 5
+	FrequencyUnit  string // e.g. times, days
+	FrequencyRate  int    // e.g. 40000 (amount per unit)
 	PocketID       *uuid.UUID
 	GoalID         *uuid.UUID
 	CreatedAt      time.Time
