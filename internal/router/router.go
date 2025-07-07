@@ -72,7 +72,6 @@ func SetupRouter() *gin.Engine {
 				expenseGroup.GET("/:id", handler.GetExpenseByID)
 				expenseGroup.PUT("/:id", handler.UpdateExpense)
 				expenseGroup.DELETE("/:id", handler.DeleteExpense)
-				expenseGroup.GET("/me", handler.GetAllExpensesByUserID)
 			}
 
 			// Dashboard route

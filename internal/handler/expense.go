@@ -30,111 +30,23 @@ type CreateExpenseRequest struct {
 // @Failure      500  {object}  ErrorResponse
 // @Router       /api/expenses [get]
 func GetAllExpenses(c *gin.Context) {
-	var expenses []db.Expense
-	query := db.DB
-
-	// Optional filters
-	date := c.Query("date")
-	month := c.Query("month")
-	category := c.Query("category")
-	groupBy := c.Query("group_by")
-
-	if date != "" {
-		parsedDate, err := time.Parse("2006-01-02", date)
-		if err == nil {
-			query = query.Where("date::date = ?", parsedDate)
-		}
-	}
-
-	if month != "" {
-		parsedMonth, err := time.Parse("2006-01", month)
-		if err == nil {
-			start := parsedMonth
-			end := parsedMonth.AddDate(0, 1, 0)
-			query = query.Where("date >= ? AND date < ?", start, end)
-		}
-	}
-
-	if category != "" {
-		query = query.Where("category = ?", category)
-	}
-
-	// Grouping
-	if groupBy == "date" {
-		type DailySummary struct {
-			Date  time.Time `json:"date"`
-			Total int       `json:"total"`
-		}
-
-		rawSQL := `
-		SELECT 
-			date::date AS date,
-			SUM(amount) AS total
-		FROM expenses
-		WHERE 1 = 1
-	`
-
-		var args []interface{}
-		argCount := 1
-
-		if date != "" {
-			rawSQL += fmt.Sprintf(" AND date::date = $%d", argCount)
-			parsedDate, _ := time.Parse("2006-01-02", date)
-			args = append(args, parsedDate)
-			argCount++
-		}
-
-		if month != "" {
-			parsedMonth, _ := time.Parse("2006-01", month)
-			start := parsedMonth
-			end := parsedMonth.AddDate(0, 1, 0)
-			rawSQL += fmt.Sprintf(" AND date >= $%d AND date < $%d", argCount, argCount+1)
-			args = append(args, start, end)
-			argCount += 2
-		}
-
-		if category != "" {
-			rawSQL += fmt.Sprintf(" AND category = $%d", argCount)
-			args = append(args, category)
-			argCount++
-		}
-
-		rawSQL += " GROUP BY date::date ORDER BY date"
-
-		var results []DailySummary
-		if err := db.DB.Raw(rawSQL, args...).Scan(&results).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, results)
-		return
-	}
-
-	// Normal query
-	if err := query.Order("date DESC").Find(&expenses).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, expenses)
-}
-
-// GetAllExpensesByUserID godoc
-// @Summary      Get all expenses by user ID
-// @Description  Returns a list of all expenses for a specific user
-// @Tags         Expenses
-// @Produce      json
-// @Param        user_id  query     string  true  "User ID"
-// @Success      200      {array}   db.Expense
-// @Failure      400      {object}  ErrorResponse
-// @Failure      500      {object}  ErrorResponse
-// @Router       /api/expenses/user [get]
-func GetAllExpensesByUserID(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	var userID uuid.UUID
+	uidParam, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
+	uid, ok := uidParam.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	parsedUUID, err := uuid.Parse(uid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+	userID = parsedUUID
 
 	var expenses []db.Expense
 	query := db.DB.Where("user_id = ?", userID)
@@ -237,32 +149,33 @@ func GetAllExpensesByUserID(c *gin.Context) {
 // @Failure 	 500      {object}  ErrorResponse
 // @Router       /api/expenses [post]
 func CreateExpense(c *gin.Context) {
-	userIDRaw, exists := c.Get("user_id")
+	var userID uuid.UUID
+	uidParam, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
+	uid, ok := uidParam.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	parsedUUID, err := uuid.Parse(uid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+	userID = parsedUUID
+
 	var createExpense CreateExpenseRequest
 	if err := c.ShouldBindJSON(&createExpense); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userIDStr, ok := userIDRaw.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID format"})
-		return
-	}
-
-	uid, err := uuid.Parse(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid UUID"})
-		return
-	}
-
 	expense := db.Expense{
 		ID:        uuid.New(),
-		UserID:    uid,
+		UserID:    userID,
 		Category:  createExpense.Category,
 		Amount:    createExpense.Amount,
 		Note:      createExpense.Note,
@@ -287,9 +200,27 @@ func CreateExpense(c *gin.Context) {
 // @Failure      404  {object}  ErrorResponse
 // @Router       /api/expenses/{id} [get]
 func GetExpenseByID(c *gin.Context) {
+	var userID uuid.UUID
+	uidParam, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	uid, ok := uidParam.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	parsedUUID, err := uuid.Parse(uid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+	userID = parsedUUID
+
 	id := c.Param("id")
 	var expense db.Expense
-	if err := db.DB.First(&expense, "id = ?", id).Error; err != nil {
+	if err := db.DB.First(&expense, "id = ? AND user_id = ?", id, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Expense not found"})
 		return
 	}
@@ -309,9 +240,27 @@ func GetExpenseByID(c *gin.Context) {
 // @Failure      404      {object}  ErrorResponse
 // @Router       /api/expenses/{id} [put]
 func UpdateExpense(c *gin.Context) {
+	var userID uuid.UUID
+	uidParam, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	uid, ok := uidParam.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	parsedUUID, err := uuid.Parse(uid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+	userID = parsedUUID
+
 	id := c.Param("id")
 	var expense db.Expense
-	if err := db.DB.First(&expense, "id = ?", id).Error; err != nil {
+	if err := db.DB.First(&expense, "id = ? AND user_id = ?", id, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Expense not found"})
 		return
 	}
@@ -319,6 +268,7 @@ func UpdateExpense(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	expense.UserID = userID // Ensure userID is not changed
 	if err := db.DB.Save(&expense).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -336,8 +286,26 @@ func UpdateExpense(c *gin.Context) {
 // @Failure      500  {object}  ErrorResponse
 // @Router       /api/expenses/{id} [delete]
 func DeleteExpense(c *gin.Context) {
+	var userID uuid.UUID
+	uidParam, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	uid, ok := uidParam.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user ID type"})
+		return
+	}
+	parsedUUID, err := uuid.Parse(uid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format"})
+		return
+	}
+	userID = parsedUUID
+
 	id := c.Param("id")
-	if err := db.DB.Delete(&db.Expense{}, "id = ?", id).Error; err != nil {
+	if err := db.DB.Delete(&db.Expense{}, "id = ? AND user_id = ?", id, userID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
